@@ -1,0 +1,51 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Build the application
+      run: dotnet build --configuration Release
+
+    - name: Publish the application
+      run: dotnet publish --configuration Release --output ./out
+
+    - name: Build Docker image
+      run: docker build -t helloworldwebapp:latest .
+
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+    - name: Push Docker image
+      run: docker tag webapp:latest ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+      run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+
+    - name: Deploy to VM
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        VM_IP: ${{ secrets.VM_IP }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${VM_IP} << 'EOF'
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+          docker stop webapp || true
+          docker rm webapp || true
+          docker run -d -p 80:80 --name webapp ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+EOF
