@@ -21,4 +21,4 @@ COPY --from=build-env /app/out .
 EXPOSE 80
 
 # Run the application
-ENTRYPOINT ["dotnet", "HelloWorldWebApp.dll"]
+ENTRYPOINT ["dotnet", "webapp.dll"]
