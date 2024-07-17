@@ -31,8 +31,9 @@ jobs:
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
     - name: Push Docker image
-      run: docker tag webapp:latest ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
-      run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+      run: |
+        docker tag webapp:latest ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
 
     - name: Deploy to VM
       env:
@@ -43,9 +44,9 @@ jobs:
         mkdir -p ~/.ssh
         echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${VM_IP} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${VM_IP} <<EOF
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
           docker stop webapp || true
           docker rm webapp || true
           docker run -d -p 80:80 --name webapp ${{ secrets.DOCKER_HUB_USERNAME }}/webapp:latest
-EOF
+        EOF
