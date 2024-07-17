@@ -4,14 +4,15 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 # Set the working directory
 WORKDIR /app
 
+# Copy the .csproj file and restore dependencies
+COPY webapp/*.csproj ./webapp/
+RUN dotnet restore ./webapp/webapp.csproj
+
 # Copy the entire project
-COPY . ./
+COPY . .
 
-# Navigate to the directory containing the .csproj file (adjust as needed)
-WORKDIR /app/src/webapp
-
-# Restore dependencies
-RUN dotnet restore
+# Set the working directory to the webapp directory
+WORKDIR /app/webapp
 
 # Build the project
 RUN dotnet build --configuration Release --no-restore
