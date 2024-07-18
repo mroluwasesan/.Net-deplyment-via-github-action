@@ -13,11 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
       - name: Log Commit Message
         run: |
           echo "Commit message: ${{ github.event.head_commit.message }}" >> activities.log
@@ -37,3 +32,8 @@ jobs:
         run: |
           git push https://${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
         
+      - name: Push changes
+        env:
+            PAT_TOKEN: ${{ secrets.TOKEN }}
+        run: |
+            git push https://${TOKEN}@github.com/${{ github.repository }}.git HEAD:main
