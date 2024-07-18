@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/user/Downloads/dotnet-deployment-via-github-action/WebApp/WebApp.csproj": {}
+    "/Users/user/Downloads/dotnet-deployment-via-github-action/src/WebApp/WebApp.csproj": {}
   },
   "projects": {
-    "/Users/user/Downloads/dotnet-deployment-via-github-action/WebApp/WebApp.csproj": {
+    "/Users/user/Downloads/dotnet-deployment-via-github-action/src/WebApp/WebApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/user/Downloads/dotnet-deployment-via-github-action/WebApp/WebApp.csproj",
+        "projectUniqueName": "/Users/user/Downloads/dotnet-deployment-via-github-action/src/WebApp/WebApp.csproj",
         "projectName": "WebApp",
-        "projectPath": "/Users/user/Downloads/dotnet-deployment-via-github-action/WebApp/WebApp.csproj",
+        "projectPath": "/Users/user/Downloads/dotnet-deployment-via-github-action/src/WebApp/WebApp.csproj",
         "packagesPath": "/Users/user/.nuget/packages/",
-        "outputPath": "/Users/user/Downloads/dotnet-deployment-via-github-action/WebApp/obj/",
+        "outputPath": "/Users/user/Downloads/dotnet-deployment-via-github-action/src/WebApp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/user/.nuget/NuGet/NuGet.Config"
@@ -46,6 +46,14 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.7, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
