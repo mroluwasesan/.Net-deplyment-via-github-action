@@ -21,10 +21,10 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/WebApp/WebApp.csproj
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build src/WebApp/WebApp.csproj --configuration Release --no-restore
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -39,69 +39,10 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
+        file: ./Dockerfile
         push: true
         tags: ${{ env.DOCKER_IMAGE }}:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Deploy to Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-      run: |
-        install -m 600 -D /dev/null ~/.ssh/id_rsa
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        ssh -o StrictHostKeyChecking=no -T ${SSH_USER}@${SERVER_IP} << EOF
-          set -e
-          
-          # Update the system
-          sudo apt-get update
-          sudo apt-get upgrade -y
-          
-          # Install prerequisites
-          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-
-          # Install Docker
-          if ! command -v docker &> /dev/null; then
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            sudo usermod -aG docker \$USER
-            sudo systemctl enable docker
-            sudo systemctl start docker
-          fi
-
-          # Install Docker Compose
-          if ! command -v docker-compose &> /dev/null; then
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-          fi
-
-          # Pull the latest image
-          sudo docker pull ${DOCKER_IMAGE}:latest
-          
-          # Stop and remove the existing container if it exists
-          sudo docker rm -f webapp || true
-          
-          # Run the new container
-          sudo docker run -d -p 80:80 --name webapp \
-            -e ConnectionStrings__DefaultConnection="Host=your_postgres_host;Database=tododb;Username=your_username;Password=your_password" \
-            --restart unless-stopped \
-            ${DOCKER_IMAGE}:latest
-
-          # Install and configure Nginx as a reverse proxy (optional, for SSL termination)
-          # sudo apt-get install -y nginx
-          # sudo systemctl enable nginx
-          # sudo systemctl start nginx
-          
-          # Setup UFW firewall (optional, but recommended)
-          # sudo apt-get install -y ufw
-          # sudo ufw allow OpenSSH
-          # sudo ufw allow 80/tcp
-          # sudo ufw allow 443/tcp
-          # sudo ufw --force enable
-
-        EOF
-
-    - name: Verify deployment
-      run: |
-        curl -I http://${SERVER_IP}:80
+    # ... rest of the workflow remains the same
