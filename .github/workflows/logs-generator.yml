@@ -1,0 +1,43 @@
+name: Generate Activity Logs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate_logs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Action"
+        git config user.email "action@github.com"
+
+    - name: Generate and append logs
+      run: |
+        # Create logs directory if it doesn't exist
+        mkdir -p logs
+
+        # Generate log of recent activity
+        echo "Activity log generated on $(date)" >> logs/activity_log.md
+        echo "----------------------------------------" >> logs/activity_log.md
+        git log --since="1 week ago" --pretty=format:"%h - %an, %ar : %s" >> logs/activity_log.md
+        echo -e "\n\n" >> logs/activity_log.md
+
+        # Commit and push changes
+        git add logs/activity_log.md
+        git commit -m "Update activity log [skip ci]"
+        git push
+
+    - name: Upload logs as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: activity-logs
+        path: logs/activity_log.md
